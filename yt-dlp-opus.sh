@@ -13,6 +13,7 @@ YTDL_OPTS=(
     -x                  # Extract audio only
     --audio-format opus # Convert to Opus format
     --embed-thumbnail   # Embed video thumbnail as cover art
+    --audio-quality 0   # Best quality
     --add-metadata      # Embed general metadata (title, artist, etc.)
 )
 ##########################################################
