@@ -2,7 +2,7 @@
 
 ## name: dotfile-switcher.sh
 ## author: Dat (and AI)
-## description: Switch between different dotfile themes: clean old symlinks, apply new ones, and install GTK themes/icons from ZIP files.
+## description: Switch between themes, apply symlinks, and install GTK themes/icons smartly.
 ## usage: bash dotfile-switcher.sh
 
 ########################################
@@ -11,18 +11,22 @@ LOGFILE="$HOME/Templates/dotfiles-sync.log"
 ########################################
 
 set -euo pipefail
+
+# Create log directory and redirect output to logfile
+mkdir -p "$(dirname "$LOGFILE")"
 exec > >(tee -a "$LOGFILE") 2>&1
 
-# Clean old symlinks
+# Function to clean old symlinks
 clean_old_links() {
-    echo "--- Cleaning up old dotfile symlinks ---"
-
+    echo "--- Cleaning up old symlinks ---"
+    # Scan for links in HOME and .config
     mapfile -t links < <(find "$HOME" "$HOME/.config" -maxdepth 1 -type l 2>/dev/null)
 
     for link in "${links[@]}"; do
         [[ -e "$link" ]] || continue
         target=$(readlink -f "$link" 2>/dev/null) || continue
 
+        # Remove link if it points to our dotfiles directory
         if [[ "$target" == "$BASE_DOTFILES_DIR"* ]]; then
             echo "[#] Removing old link: $link"
             rm -f "$link"
@@ -30,38 +34,81 @@ clean_old_links() {
     done
 }
 
-# Theme Selection
+# Smart ZIP extraction function
+extract_and_move() {
+    local zipfile="$1"
+    local dest_dir="$2"
+    local type_name="$3" # "Theme" or "Icon"
+
+    # Detect the first folder name inside the ZIP
+    local root_folder_in_zip
+    root_folder_in_zip=$(unzip -Z1 "$zipfile" | head -n1 | cut -d/ -f1)
+
+    # If this folder already exists in destination, skip extraction
+    if [[ -d "${dest_dir}/${root_folder_in_zip}" ]]; then
+        echo "[-] $type_name already exists, skipping: $root_folder_in_zip"
+        return 0
+    fi
+
+    echo "[✓] New $type_name detected, installing: $(basename "$zipfile")"
+
+    # Extract to a temporary directory
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    unzip -o -LL -q "$zipfile" -d "$tmp_dir"
+    chmod -R u+rwX "$tmp_dir"
+
+    # Move to destination
+    shopt -s dotglob nullglob
+    for item in "$tmp_dir"/*; do
+        [ -e "$item" ] || continue
+        item_name=$(basename "$item")
+        echo "    Moving: $item_name"
+        rm -rf "${dest_dir}/${item_name}" 
+        mv "$item" "$dest_dir/"
+    done
+    shopt -u dotglob nullglob
+    rm -rf "$tmp_dir"
+}
+
+# Directory check
+if [[ ! -d "$BASE_DOTFILES_DIR" ]]; then
+    echo "[!] Error: $BASE_DOTFILES_DIR directory not found!"
+    exit 1
+fi
+
 echo "##### Available Themes #####"
 cd "$BASE_DOTFILES_DIR"
+# List only directories
+options=(*/)
 PS3="Please select a theme (number): "
-select SELECTED_DIR in */; do
+select SELECTED_DIR in "${options[@]}"; do
     if [[ -n "$SELECTED_DIR" ]]; then
         DOTFILES="${BASE_DOTFILES_DIR}/${SELECTED_DIR%/}"
         echo "Selected Theme: $(basename "$DOTFILES")"
         break
     else
-        echo "[!] Invalid selection. Please try again."
+        echo "[!] Invalid selection."
     fi
 done
 
-# Confirmation
-read -p "This will remove old symlinks and apply the new theme (including GTK themes/icons). Proceed? (y/n): " confirm
+read -p "Old links will be removed and the new theme will be applied. Proceed? (y/n): " confirm
 [[ "$confirm" != [yY]* ]] && echo "Aborted by user." && exit 1
 
-# Clean old symlinks
 clean_old_links
 
-# Link new .config files
+# Link .config files
 CONFIG_DIR="$DOTFILES/config"
 if [[ -d "$CONFIG_DIR" ]]; then
-    echo "--- Linking new .config files ---"
+    echo "##### Linking .config files #####"
+    mkdir -p "$HOME/.config"
     for ITEM in "$CONFIG_DIR"/*; do
         [ -e "$ITEM" ] || continue
         NAME=$(basename "$ITEM")
         DEST="$HOME/.config/$NAME"
 
         if [[ -e "$DEST" && ! -L "$DEST" ]]; then
-            echo "[!] Warning: Real folder/file exists at $DEST, skipping to avoid overwrite."
+            echo "[!] Warning: Real file/folder exists at $DEST, skipping to avoid overwrite."
             continue
         fi
 
@@ -70,21 +117,20 @@ if [[ -d "$CONFIG_DIR" ]]; then
     done
 fi
 
-# Link new home dotfiles
-echo "--- Linking new home dotfiles ---"
+# Link home directory dotfiles
+echo "##### Linking home dotfiles #####"
 for ITEM in "$DOTFILES"/*; do
     NAME=$(basename "$ITEM")
-    # Skip config, themes, icons folders and the script itself
-    [[ "$NAME" == "config" || "$NAME" == "themes" || "$NAME" == "icons" ]] && continue
+    # Skip special folders and the script itself
+    [[ "$NAME" == "config" || "$NAME" == "themes" || "$NAME" == "icons" || "$NAME" == ".git" ]] && continue
     [[ "$NAME" == "$(basename "$0")" ]] && continue
 
     DEST="$HOME/.$NAME"
-    if [[ "$NAME" == .* ]]; then
-        DEST="$HOME/$NAME"
-    fi
+    # Handle cases where files already start with a dot
+    if [[ "$NAME" == .* ]]; then DEST="$HOME/$NAME"; fi
 
     if [[ -e "$DEST" && ! -L "$DEST" ]]; then
-        echo "[!] Warning: Real file exists at $DEST, skipping to avoid overwrite."
+        echo "[!] Warning: Real file exists at $DEST, skipping."
         continue
     fi
 
@@ -92,75 +138,23 @@ for ITEM in "$DOTFILES"/*; do
     echo "[✓] Linked: $DEST"
 done
 
-# GTK Themes and Icons: Extract and move contents
-echo "--- Handling GTK themes and icons ---"
-
-THEMES_SRC="$DOTFILES/themes"
-ICONS_SRC="$DOTFILES/icons"
-
+# Handle GTK Themes and Icons
 THEMES_DEST="$HOME/.themes"
 ICONS_DEST="$HOME/.icons"
-
 mkdir -p "$THEMES_DEST" "$ICONS_DEST"
 
-# Temporary extraction directory (auto-cleaned on exit)
-TMP_EXTRACT=$(mktemp -d)
-trap 'rm -rf "$TMP_EXTRACT"' EXIT
-
-extract_and_move() {
-    local zipfile="$1"
-    local dest_dir="$2"
-    local type_name="$3"  # "theme" or "icon"
-
-    echo "[✓] Processing $(basename "$zipfile") → $dest_dir"
-
-    # Extract quietly, force lowercase filenames, overwrite existing
-    unzip -o -LL -q "$zipfile" -d "$TMP_EXTRACT"
-
-    # Fix permissions to ensure everything is movable
-    chmod -R u+rwX "$TMP_EXTRACT"
-
-    # Move all extracted top-level items
-    shopt -s dotglob nullglob
-    for item in "$TMP_EXTRACT"/*; do
-        [ -e "$item" ] || continue
-        item_name=$(basename "$item")
-        echo "   Moving $type_name: $item_name"
-        rm -rf "${dest_dir}/${item_name}"  # Remove old version if exists
-        mv "$item" "$dest_dir/"
+# Themes
+if [[ -d "$DOTFILES/themes" ]]; then
+    for zip in "$DOTFILES/themes"/*.zip; do
+        [[ -f "$zip" ]] && extract_and_move "$zip" "$THEMES_DEST" "Theme"
     done
-    shopt -u dotglob nullglob
-
-    # Clear temp directory for next ZIP
-    rm -rf "$TMP_EXTRACT"/*
-}
-
-# Handle themes
-if [[ -d "$THEMES_SRC" ]]; then
-    echo "Installing GTK themes from $THEMES_SRC ..."
-    found_zip=false
-    for zipfile in "$THEMES_SRC"/*.zip; do
-        [[ -f "$zipfile" ]] || continue
-        found_zip=true
-        extract_and_move "$zipfile" "$THEMES_DEST" "theme"
-    done
-    $found_zip || echo "No theme ZIP files found in $THEMES_SRC."
-else
-    echo "No 'themes' directory found in selected theme."
 fi
 
-# Handle icons
-if [[ -d "$ICONS_SRC" ]]; then
-    echo "Installing icon packs from $ICONS_SRC ..."
-    found_zip=false
-    for zipfile in "$ICONS_SRC"/*.zip; do
-        [[ -f "$zipfile" ]] || continue
-        found_zip=true
-        extract_and_move "$zipfile" "$ICONS_DEST" "icon"
+# Icons
+if [[ -d "$DOTFILES/icons" ]]; then
+    for zip in "$DOTFILES/icons"/*.zip; do
+        [[ -f "$zip" ]] && extract_and_move "$zip" "$ICONS_DEST" "Icon"
     done
-    $found_zip || echo "No icon ZIP files found in $ICONS_SRC."
-else
-    echo "No 'icons' directory found in selected theme."
 fi
 
-echo "Completed! All dotfiles, GTK themes, and icons have been applied successfully."
+echo -e "\n[DONE] Theme applied successfully!"
