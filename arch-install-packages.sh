@@ -75,6 +75,7 @@ declare -a PACKAGES=(
     "python-mutagen"     # Python audio metadata library
     "caligula"           # Disk burning tool
     "tldr"               # Tealdeer tldr manual for apps
+    "gitleaks"           # Git controller
 
     # Hardware & Drivers
     # Networking, audio, Bluetooth, and graphics drivers.
@@ -118,7 +119,7 @@ declare -a PACKAGES=(
     "qt6ct"              # Qt6 configuration tool
     "nwg-look"           # GTK theme manager
     "hyprshot"           # Screenshotter tool for hyprland
-    "ydotool"            # 
+    "ydotool"            # command line automation tool
 
     # Core Applications
     # Web, communication, media playback, and file management.
