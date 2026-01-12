@@ -137,6 +137,7 @@ declare -a PACKAGES=(
     "vlc"                # Media player
     "vlc-plugins-all"    # All VLC plugins
     "ffmpeg"             # Multimedia framework
+    "metadata-cleaner"   # Metadata searcyh and clean GUI
 
     # Development & Office
     # Coding and productivity tools.
