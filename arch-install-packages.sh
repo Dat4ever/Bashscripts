@@ -50,7 +50,6 @@ declare -a PACKAGES=(
     "reflector"          # Updates mirrorlist for faster downloads
     "sudo"               # Allow privilege escalation
     "yay"                # AUR helper
-    "zsh"                # Z shell
     "curl"               # Transferring data with URLs
     "bleachbit"          # System cleaner
     "xorg-xhost"         # This is for running bleachbit with root
