@@ -150,7 +150,7 @@ declare -a PACKAGES=(
     # Gaming platform, emulation, and other entertainment apps.
     "steam"              # Gaming platform
     "wine"               # Windows compatibility layer
-    "bottles"            # Wine manager
+    "an-anime-game-launcher-bin" # Genshin impact runner :)
     "prismlauncher"      # Minecraft launcher
     "retroarch"          # Frontend for emulators
     "retroarch-assets-ozone" # RetroArch Ozone assets
