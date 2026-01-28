@@ -96,6 +96,7 @@ declare -a PACKAGES=(
     "intel-ucode"        # Intel CPU microcode updates
     "nvidia-open-dkms"   # NVIDIA open-source kernel modules
     "nvidia-settings"    # NVIDIA X Server Settings
+    "cuda"               # Nvidia cuda support
 
     # Desktop Environment
     # Hyprland WM, SDDM, Wayland helpers, and theming tools.
