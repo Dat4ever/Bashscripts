@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-## name: bashscript-header-maker.sh
+## name: bashscript-headermaker.sh
 ## author: Dat (and AI)
 ## description: Makes bashscript header.
 ## usage: bash bashscript-header-maker.sh

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-## name: arch-install-packages.sh
+## name: arch-install-update.sh
 ## author: Dat (and AI)
 ## description: Arch Linux package synchronization and system update script
 ## usage: bash arch-install-packages.sh
@@ -13,7 +13,7 @@ sudo pacman -S --needed --noconfirm reflector
 # Update mirrorlist with faster and more reliable mirrors (Turkey + nearby European countries)
 echo "Updating Mirrorlist..."
 sudo reflector \
-    --country 'Turkey,Germany,Bulgaria,Romania,Greece,France,Netherlands' \
+    --country 'Turkey,Germany,Bulgaria,Romania,Greece,France' \
     --age 12 \
     --protocol https \
     --latest 15 \
@@ -74,7 +74,6 @@ declare -a PACKAGES=(
     "python-mutagen"     # Python audio metadata library
     "caligula"           # Disk burning tool
     "tldr"               # Tealdeer tldr manual for apps
-    "gitleaks"           # Git controller
 
     # Hardware & Drivers
     # Networking, audio, Bluetooth, and graphics drivers.
@@ -119,7 +118,7 @@ declare -a PACKAGES=(
     "qt6ct"              # Qt6 configuration tool
     "nwg-look"           # GTK theme manager
     "hyprshot"           # Screenshotter tool for hyprland
-    "ydotool"            # command line automation tool
+    "ydotool"            # command line keyboard automation tool
 
     # Core Applications
     # Web, communication, media playback, and file management.
@@ -151,14 +150,14 @@ declare -a PACKAGES=(
     # Gaming platform, emulation, and other entertainment apps.
     "steam"              # Gaming platform
     "wine"               # Windows compatibility layer
-    "an-anime-game-launcher-bin" # Genshin impact runner :)
+    "an-anime-game-launcher-bin" # Genshin impact starter
     "prismlauncher"      # Minecraft launcher
     "retroarch"          # Frontend for emulators
     "retroarch-assets-ozone" # RetroArch Ozone assets
     "retroarch-assets-xmb" # RetroArch XMB assets
     "libretro-mgba"      # mGBA libretro core 	
     "calibre"            # E-book library management
-    "yt-dlp"             # YouTube downloader
+    "yt-dlp-git"         # YouTube downloader
     "mousai"             # Song identification tool
     "pokeget"            # Pokémon CLI utility
     "komikku"            # Comic,Manga,Mahnwa,Manhua Reader/Downloader

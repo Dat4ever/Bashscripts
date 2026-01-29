@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-## name: yt-dlp-audio.sh
+## name: yt-dlp-opus.sh
 ## author: Dat (and AI)
 ## description: Downloads YouTube audio (video or playlist) in Opus format, 
 ## usage: ./yt-dlp-audio.sh <URL> [ -p | --playlist ]
 
 ##################### Configuration #####################
-BASE_DIR="$HOME/Music/yt-dlp-downloads"
+BASE_DIR="$HOME/Downloads/yt-dlp-downloads"
 ARCHIVE_FILE="$BASE_DIR/downloaded_archive.txt"
 
 YTDL_OPTS=(

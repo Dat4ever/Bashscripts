@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-## name: rsync_backup.sh
+## name: rsync-backup.sh
 ## author: Dat (and AI)
 ## description: Simple rsync backup with auto-mount via UUID.
 ## usage: bash rsync_backup.sh [--dry-run]
