@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 ## name: dotfile-symlinker.sh
-## author: Dat (and AI)
 ## description: Switch between themes, apply symlinks, and install GTK themes/icons smartly.
 ## usage: bash dotfile-switcher.sh
 

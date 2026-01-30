@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 ## name: arch-install-update.sh
-## author: Dat (and AI)
 ## description: Arch Linux package synchronization and system update script
 ## usage: bash arch-install-packages.sh
 
@@ -74,6 +73,8 @@ declare -a PACKAGES=(
     "python-mutagen"     # Python audio metadata library
     "caligula"           # Disk burning tool
     "tldr"               # Tealdeer tldr manual for apps
+    "kid3-qt"            # An MP3, Ogg/Vorbis and FLAC tag editor
+    "bc"                 # basic calculator
 
     # Hardware & Drivers
     # Networking, audio, Bluetooth, and graphics drivers.
@@ -120,7 +121,7 @@ declare -a PACKAGES=(
     "hyprshot"           # Screenshotter tool for hyprland
     "ydotool"            # command line keyboard automation tool
 
-    # Core Applications
+    # Applications
     # Web, communication, media playback, and file management.
     "firefox"            # Mozilla Firefox browser
     "chromium"           # Chromium web browser
