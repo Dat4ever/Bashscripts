@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-## name: bashscript-headermaker.sh
+## name: bashscript-headermaker.bash
+## author: Dat (and AI)
 ## description: Makes bashscript header.
 ## usage: bash bashscript-header-maker.sh
 
 # Prompt user for script details
 read -p "Filename: " filename
+read -p "Author:" author
 read -p "Description: " description
 read -p "Usage: " usage
 
@@ -20,6 +22,7 @@ cat <<EOF > "$filename"
 #!/usr/bin/env bash
 
 ## name: $filename
+## author: $author
 ## description: $description
 ## usage: $usage
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-## name: ffmpeg-opus-trimmer.sh
+## name: ffmpeg-opus-trimmer.bash
+## author: Dat (and AI)
 ## description: Removes first and/or last seconds from opus while preserving quality and album art.
 ## usage: bash ffmpeg-opus-trimmer.sh <filename> <start_seconds> <end_seconds>
 

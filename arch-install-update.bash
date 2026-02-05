@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-## name: arch-install-update.sh
+## name: arch-install-update.bash
+## author: Dat (and AI)
 ## description: Arch Linux package synchronization and system update script
 ## usage: bash arch-install-packages.sh
 
@@ -9,7 +10,7 @@ set -e
 # Install reflector if not already present (required for mirror update)
 sudo pacman -S --needed --noconfirm reflector
 
-# Update mirrorlist with faster and more reliable mirrors (Turkey + nearby European countries)
+# Update mirrorlist with faster and more reliable mirrors
 echo "Updating Mirrorlist..."
 sudo reflector \
     --country 'Turkey,Germany,Bulgaria,Romania,Greece,France' \
@@ -23,20 +24,15 @@ echo "Synchronizing package databases and upgrading the system..."
 
 # Install yay from AUR if not already present
 if ! command -v yay &> /dev/null; then
-    echo "yay not found → installing from AUR..."
+    echo "yay not found → installing..."
     sudo pacman -S --needed --noconfirm git base-devel
     git clone https://aur.archlinux.org/yay.git /tmp/yay
     (cd /tmp/yay && makepkg -si --noconfirm)
     rm -rf /tmp/yay
-    echo "yay installed successfully!"
-else
-    echo "yay is already installed."
 fi
 
 # Package list
 declare -a PACKAGES=(
-    # System Essentials
-    # Core system functionality, kernel, and boot management.
     "acpid"              # ACPI power management daemon
     "base"               # Minimal package set for base Arch system
     "base-devel"         # Essential development tools (make, gcc, etc.)
@@ -51,10 +47,6 @@ declare -a PACKAGES=(
     "yay"                # AUR helper
     "curl"               # Transferring data with URLs
     "bleachbit"          # System cleaner
-    "xorg-xhost"         # This is for running bleachbit with root
-
-    # Filesystem & Utils
-    # Btrfs, filesystem tools, disk/system monitoring, and core utilities.
     "btrfs-progs"        # Tools for Btrfs filesystem
     "dosfstools"         # Tools for FAT filesystems
     "snapper"            # A tool for managing BTRFS and LVM snapshots
@@ -72,12 +64,10 @@ declare -a PACKAGES=(
     "jq"                 # JSON processor
     "python-mutagen"     # Python audio metadata library
     "caligula"           # Disk burning tool
+    "pacman-contrib"     # Pacman cache cleaner utility
     "tldr"               # Tealdeer tldr manual for apps
     "kid3-qt"            # An MP3, Ogg/Vorbis and FLAC tag editor
     "bc"                 # basic calculator
-
-    # Hardware & Drivers
-    # Networking, audio, Bluetooth, and graphics drivers.
     "networkmanager"     # Network connection manager
     "network-manager-applet" # NetworkManager tray applet
     "iptables-nft"       # nftables-based iptables
@@ -97,9 +87,6 @@ declare -a PACKAGES=(
     "nvidia-open-dkms"   # NVIDIA open-source kernel modules
     "nvidia-settings"    # NVIDIA X Server Settings
     "cuda"               # Nvidia cuda support
-
-    # Desktop Environment
-    # Hyprland WM, SDDM, Wayland helpers, and theming tools.
     "hyprland"           # Dynamic Wayland compositor
     "hyprcursor"         # Hyprland cursor theme engine
     "hypridle"           # Hyprland idle daemon
@@ -120,9 +107,6 @@ declare -a PACKAGES=(
     "nwg-look"           # GTK theme manager
     "hyprshot"           # Screenshotter tool for hyprland
     "ydotool"            # command line keyboard automation tool
-
-    # Applications
-    # Web, communication, media playback, and file management.
     "firefox"            # Mozilla Firefox browser
     "chromium"           # Chromium web browser
     "thunar"             # File manager for Xfce
@@ -138,17 +122,12 @@ declare -a PACKAGES=(
     "vlc-plugins-all"    # All VLC plugins
     "ffmpeg"             # Multimedia framework
     "metadata-cleaner"   # Metadata searcyh and clean GUI
-
-    # Development & Office
-    # Coding and productivity tools.
+    "pastel"             # GUI color analyzer/generator
     "neovim"             # Vim fork focused on extensibility
     "vim"                # Vi improved text editor
     "visual-studio-code-bin" # VScode IDE
     "netbeans"           # Java IDE
     "libreoffice-fresh"  # LibreOffice office suite
-
-    # Gaming & Entertainment
-    # Gaming platform, emulation, and other entertainment apps.
     "steam"              # Gaming platform
     "wine"               # Windows compatibility layer
     "an-anime-game-launcher-bin" # Genshin impact starter
@@ -162,9 +141,6 @@ declare -a PACKAGES=(
     "mousai"             # Song identification tool
     "pokeget"            # Pokémon CLI utility
     "komikku"            # Comic,Manga,Mahnwa,Manhua Reader/Downloader
-
-    # Fonts & Icons
-    # Typefaces for visual consistency.
     "noto-fonts"         # Noto font family
     "noto-fonts-emoji"   # Noto emoji fonts
     "ttf-nerd-fonts-symbols" # Nerd Fonts symbols
@@ -181,18 +157,6 @@ done
 
 echo "Installing/updating defined packages..."
 yay -Syyu --needed "${PACKAGE_NAMES[@]}"
-
-# Check and remove orphan packages (with timeout to prevent hanging)
-echo "Checking for orphan packages..."
-ORPHANS=$(timeout 300 pacman -Qtdq || echo "")
-
-if [[ -n "$ORPHANS" ]]; then
-    echo "Unused orphan packages found: $ORPHANS"
-    read -p "Remove them? (y/N): " confirm
-    [[ "$confirm" =~ ^[Yy]$ ]] && sudo pacman -Rns $ORPHANS --noconfirm && echo "Orphans removed."
-else
-    echo "No orphan packages found."
-fi
 
 # Check for explicitly installed packages not defined in the script
 echo "Checking for extra packages not defined in the script..."
@@ -212,8 +176,10 @@ else
     echo "Your system is fully in sync with the script. No extra packages found."
 fi
 
-# Clean package cache (keep only the latest version)
+# Cleaning
+echo "Cleaning orphan packages..."
+yay -Yc --noconfirm     # Clean orphan packages
 echo "Cleaning pacman cache..."
-sudo pacman -Sc --noconfirm
+yay -Sc --noconfirm     # Clean package cache
 
 echo "Process completed!"

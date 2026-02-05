@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-## name: xfce-theme-change.sh
+## name: xfce-theme-change.bash
+## author: Dat
 ## description: Xfce GTK theme, icon theme, cursor theme changer. Also changes background and neovim colorscheme.
 ## usage: bash xfce_theme_change.sh [number]
 
