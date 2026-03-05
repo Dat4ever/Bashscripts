@@ -13,10 +13,10 @@ sudo pacman -S --needed --noconfirm reflector
 # Update mirrorlist with faster and more reliable mirrors
 echo "Updating Mirrorlist..."
 sudo reflector \
-    --country 'Turkey,Germany,Bulgaria,Romania,Greece,France' \
+    --country 'Turkey,Germany,Bulgaria,Romania,Greece' \
     --age 12 \
     --protocol https \
-    --latest 15 \
+    --latest 12 \
     --sort rate \
     --save /etc/pacman.d/mirrorlist
 
@@ -62,6 +62,7 @@ declare -a PACKAGES=(
     "xdg-user-dirs"      # Creates standard user directories
     "less"               # Pager program
     "jq"                 # JSON processor
+    "fuse2"              # AppImage Executer
     "python-mutagen"     # Python audio metadata library
     "caligula"           # Disk burning tool
     "pacman-contrib"     # Pacman cache cleaner utility
@@ -171,12 +172,14 @@ if [[ ${#TO_REMOVE[@]} -gt 0 ]]; then
     echo "The following packages are installed but not in the script list:"
     printf '%s\n' "${TO_REMOVE[@]}"
     read -p "Remove them? (y/N): " confirm
-    [[ "$confirm" =~ ^[Yy]$ ]] && sudo pacman -Rns "${TO_REMOVE[@]}" --noconfirm && echo "Extra packages removed."
+    [[ "$confirm" =~ ^[Yy]$ ]] && yay -Rns "${TO_REMOVE[@]}" --noconfirm && echo "Extra packages removed."
 else
     echo "Your system is fully in sync with the script. No extra packages found."
 fi
 
 # Cleaning
+echo "Cleaning old pacman packages..."
+sudo rm -rf /var/cache/pacman/pkg/download-*
 echo "Cleaning orphan packages..."
 yay -Yc --noconfirm     # Clean orphan packages
 echo "Cleaning pacman cache..."
