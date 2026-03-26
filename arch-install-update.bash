@@ -138,7 +138,7 @@ declare -a PACKAGES=(
     "retroarch-assets-xmb" # RetroArch XMB assets
     "libretro-mgba"      # mGBA libretro core 	
     "calibre"            # E-book library management
-    "yt-dlp-git"         # YouTube downloader
+    "yt-dlp"         # YouTube downloader
     "mousai"             # Song identification tool
     "pokeget"            # Pokémon CLI utility
     "komikku"            # Comic,Manga,Mahnwa,Manhua Reader/Downloader

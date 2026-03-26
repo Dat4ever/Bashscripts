@@ -7,7 +7,7 @@
 
 ########################## CONFIG ##########################
 SRC="$HOME"
-UUID="FFEA-317F"
+UUID="0285-95A3"
 DST_DIR="rsync_backup"
 
 OPTS=(
@@ -30,6 +30,7 @@ EXCLUDE_PATTERNS=(
     ".*"
     "/Templates"
     "/Downloads"
+    "/Documents/Oyun/PokeRogue-linux/"
 )
 
 LOG="$HOME/Templates/rsync_backup.log"
